@@ -37,10 +37,16 @@ string hasData(string s) {
     return "";
 }
 
+/**
+ * Calculates Euclidean (aka straight line) distance between 2 points.
+ */
 double distance(double x1, double y1, double x2, double y2) {
     return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
+/**
+ * Closest waypoint to you, out of all of the available waypoints in the map.
+ */
 int ClosestWaypoint(double x, double y, vector<double> maps_x, vector<double> maps_y) {
 
     double closestLen = 100000; //large number
@@ -61,6 +67,10 @@ int ClosestWaypoint(double x, double y, vector<double> maps_x, vector<double> ma
 
 }
 
+/**
+ * Nearest waypoint may be behind you but you are interested in the closest waypoint ahead of you.
+ * @param theta : car yaw ; helpful to have this when doing the transformation math.
+ */
 int NextWaypoint(double x, double y, double theta, vector<double> maps_x, vector<double> maps_y) {
 
     int closestWaypoint = ClosestWaypoint(x, y, maps_x, maps_y);
@@ -80,7 +90,16 @@ int NextWaypoint(double x, double y, double theta, vector<double> maps_x, vector
 
 }
 
-// Transform from Cartesian x,y coordinates to Frenet s,d coordinates
+
+/**
+ * Transform from Cartesian x,y coordinates to Frenet s,d coordinates
+ * @param x
+ * @param y
+ * @param theta : passed to NextWaypoint() function above.
+ * @param maps_x : waypoints that we calculate at the very beginning
+ * @param maps_y : waypoints that we calculate at the very beginning
+ * @return
+ */
 vector<double> getFrenet(double x, double y, double theta, vector<double> maps_x, vector<double> maps_y) {
     int next_wp = NextWaypoint(x, y, theta, maps_x, maps_y);
 
@@ -125,7 +144,10 @@ vector<double> getFrenet(double x, double y, double theta, vector<double> maps_x
 
 }
 
-// Transform from Frenet s,d coordinates to Cartesian x,y
+/**
+ * Transform from Frenet s,d coordinates to Cartesian x,y
+ * @param maps_s : calculate at the very beginning and used for the map within the function
+ */
 vector<double> getXY(double s, double d, vector<double> maps_s, vector<double> maps_x, vector<double> maps_y) {
     int prev_wp = -1;
 
@@ -197,6 +219,9 @@ int main() {
   	map_waypoints_dy.push_back(d_y);
   }
 
+    /**
+     * Simulator tells us the x,y and s,d coordinates along with the car's angle and speed on each message.
+     */
   h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -241,6 +266,20 @@ int main() {
 
 
           	// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
+
+            // distance increment of 0.5 metres aka how far apart the points will be spaced from each other
+            double dist_inc = 0.5; // roughly equivalent to 50 MPH
+
+            // make our car travel in a straight line (trigonometry) for the 50 points at constant velocity (dist_inc)
+            for(int i = 0; i < 50; i++)
+            {
+                next_x_vals.push_back(car_x+(dist_inc*i)*cos(deg2rad(car_yaw)));
+                next_y_vals.push_back(car_y+(dist_inc*i)*sin(deg2rad(car_yaw)));
+            }
+
+
+
+            // END
           	msgJson["next_x"] = next_x_vals;
           	msgJson["next_y"] = next_y_vals;
 
