@@ -8,10 +8,10 @@ set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
 # BDD-Style Tests
-set(sources src/test_main.cpp)
+#set(sources src/test_main.cpp)
 
 # Udacity provided boiler-plate code
-#set(sources src/main.cpp)
+set(sources src/main.cpp)
 
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

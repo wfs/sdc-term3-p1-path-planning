@@ -153,13 +153,13 @@ vector<double> getXY(double s, double d, vector<double> maps_s, vector<double> m
 
 
 // Used by Catch BDD-Style test
+/*
 std::string showMessage() {
     //std::cout << "Hello, World!" << std::endl;
     return "Hello, World!";
 }
+*/
 
-
-/*
 int main() {
   uWS::Hub h;
 
@@ -291,5 +291,3 @@ int main() {
   }
   h.run();
 }
-
-*/
