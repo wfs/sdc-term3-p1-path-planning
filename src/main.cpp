@@ -215,7 +215,7 @@ int main() {
         iss >> s;
         iss >> d_x;
         iss >> d_y;
-        map_waypoints_x.push_back(x);
+        map_waypoints_x.push_back(x);  // Adds a new element at the end of the vector, after its current last element.
         map_waypoints_y.push_back(y);
         map_waypoints_s.push_back(s);
         map_waypoints_dx.push_back(d_x);
@@ -251,9 +251,6 @@ int main() {
                         string event = j[0].get<string>();
 
                         if (event == "telemetry") {
-                            // j[1] is the data JSON object
-                            //double car_x = j[1]["x"];
-
                             // Main car's localization Data
                             double car_x = j[1]["x"];
                             double car_y = j[1]["y"];
@@ -275,9 +272,9 @@ int main() {
                             vector<vector<double>> sensor_fusion = j[1]["sensor_fusion"];
 
                             double ref_vel = 49.5; //mph
-                            //double ref_vel = 149.5; //mph
 
-                            // A previous list of points that the car was following and will help us when doing a transition.
+                            // A previous list of points that the car was following and will help us when doing a
+                            // transition.
                             int prev_size = previous_path_x.size();
 
                             // Setup reference position
@@ -287,8 +284,6 @@ int main() {
                             double ref_x = car_x;
                             double ref_y = car_y;
                             double ref_yaw = deg2rad(car_yaw);
-
-                            // NOTE : Sensor Fusion awareness of all other cars travelling in same direction.
 
                             // If previous size is about empty, use the car as starting reference.
                             if (prev_size < 2) {
@@ -305,20 +300,19 @@ int main() {
 
                                 car_s = end_path_s;
 
-                                //car_speed = (sqrt((ref_x - ref_x_prev) * (ref_x - ref_x_prev) +
-                                //                  (ref_y - ref_y_prev) * (ref_y - ref_y_prev)) / .02) * 2.237;
+                                // speed = sqrt(distance^2 / time) in metres per second
+                                // see http://mathworld.wolfram.com/Acceleration.html
                                 car_speed = (sqrt((ref_x - ref_x_prev) * (ref_x - ref_x_prev) +
                                                   (ref_y - ref_y_prev) * (ref_y - ref_y_prev)) / .02) * 2.2352;
-
                             }
 
                             //find ref_v to use
                             double closestDist_s = 100000;
                             bool change_lanes = false;
                             for (int i = 0; i < sensor_fusion.size(); i++) {
-                                //car is in my lane
                                 float d = sensor_fusion[i][6];
                                 if (d < (2 + 4 * lane + 2) && d > (2 + 4 * lane - 2)) {
+                                    //car is in my lane
                                     double vx = sensor_fusion[i][3];
                                     double vy = sensor_fusion[i][4];
                                     double check_speed = sqrt(vx * vx + vy * vy);
@@ -333,12 +327,10 @@ int main() {
                                         if ((check_car_s - car_s) > 20) {
 
                                             //match that cars speed
-                                            //ref_vel = check_speed * 2.237;
                                             ref_vel = check_speed * 2.2352;
                                             change_lanes = true;
                                         } else {
                                             //go slightly slower than the cars speed
-                                            //ref_vel = check_speed * 2.237 - 5;
                                             ref_vel = check_speed * 2.2352 - 5;
                                             change_lanes = true;
 
@@ -356,9 +348,9 @@ int main() {
                                 if (lane != 0 && !changed_lanes) {
                                     bool lane_safe = true;
                                     for (int i = 0; i < sensor_fusion.size(); i++) {
-                                        //car is in left lane
                                         float d = sensor_fusion[i][6];
                                         if (d < (2 + 4 * (lane - 1) + 2) && d > (2 + 4 * (lane - 1) - 2)) {
+                                            //car is in left lane
                                             double vx = sensor_fusion[i][3];
                                             double vy = sensor_fusion[i][4];
                                             double check_speed = sqrt(vx * vx + vy * vy);
@@ -382,9 +374,9 @@ int main() {
                                 if (lane != 2 && !changed_lanes) {
                                     bool lane_safe = true;
                                     for (int i = 0; i < sensor_fusion.size(); i++) {
-                                        //car is in right lane
                                         float d = sensor_fusion[i][6];
                                         if (d < (2 + 4 * (lane + 1) + 2) && d > (2 + 4 * (lane + 1) - 2)) {
+                                            //car is in right lane
                                             double vx = sensor_fusion[i][3];
                                             double vy = sensor_fusion[i][4];
                                             double check_speed = sqrt(vx * vx + vy * vy);
@@ -475,10 +467,12 @@ int main() {
                                 next_y_vals.push_back(previous_path_y[i]);
                             }
 
-                            // Calculate how to break up spline points so that we travel at our desired reference velocity.
-                            double target_x = 30.0;  // our horizon along x-axis
+                            // Calculate how to break up spline points so that we travel at our desired
+                            // reference velocity and avoid jerk violation.
+                            double target_x = 30.0;  // Our horizon along x-axis. Smaller than 30 values
+                            // will cause the car to drive up too close to the car in front before changing lanes.
                             double target_y = s(
-                                    target_x);  // ask the spline what is the corresponding y-value for the given x-value
+                                    target_x);  // ask spline what is the corresponding y-value for the given x-value
                             double target_dist = sqrt(
                                     (target_x) * (target_x) + (target_y) * (target_y));  // Distance from
                             // either the car or
@@ -494,16 +488,15 @@ int main() {
                             for (int i = 1; i <= 50 - previous_path_x.size(); i++) {
 
                                 if (ref_vel > car_speed) {  // speed up
-                                    car_speed += .22352;  // 0.224 m/s ~= 0.5 mph
+                                    car_speed += .22352;  // 0.22352 m/s = 0.5 mph
                                 } else if (ref_vel < car_speed) {  // too close, slow down
                                     car_speed -= .22352;
                                 }
 
-
                                 // N is the number of anchor points along the spline curve that the car will visit
                                 // every 0.02 seconds (aka simulator moves the car to next point 50 times per second).
                                 double N = (target_dist /
-                                            (.02 * car_speed / 2.2352));  // 2.2352 m/s ~= 5.0 mph
+                                            (.02 * car_speed / 2.2352));  // 2.2352 m/s = 5.0 mph
                                 // coverts ref_vel from MPH into metres per second.
                                 double x_point = x_add_on + (target_x) / N;
                                 double y_point = s(

@@ -1,3 +1,39 @@
+---
+# Project Specification Review
+## 1. Code compiles
+
+    ```bash
+    andrew@andrew-Alienware-Aurora-R5:~/dev/term3/sdc-term3-p1-path-planning/build$ cmake .. && make
+    -- Configuring done
+    -- Generating done
+    -- Build files have been written to: /home/andrew/dev/term3/sdc-term3-p1-path-planning/build
+    Scanning dependencies of target path_planning
+    [ 50%] Building CXX object CMakeFiles/path_planning.dir/src/main.cpp.o
+    [100%] Linking CXX executable path_planning
+    [100%] Built target path_planning
+    
+    ```
+
+## 2. Valid Trajectories
+### 2.1. Drive at least 1 lap without incident
+[Success](./data/one_lap.png)
+
+### 2.2. Drive to speed limit
+1. Reference velocity is set to just under the legal limit of 50 MPH (line 274 in main.cpp). Also, the spacing between the 'anchor points' along the spline curve is adjusted to ensure
+that the target ```ref_vel``` is not exceeded (lines 496-504 in main.cpp).
+
+```objectivec
+double ref_vel = 49.5; //mph
+```
+
+2. Maximum acceleration (10 m/s^2) is not exceeded due to low incremental acceleration / deceleration 
+(see lines 490-494). Maximum jerk (10 m/s^3) is not exceeded due to the spline (see line 455 in main.cpp) mapping a very smooth trajectory to the target
+lane resulting in low jerk values during lane change.
+
+3. Car does not have collisions TODO
+
+---
+
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
    
