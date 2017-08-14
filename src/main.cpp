@@ -10,6 +10,7 @@
 #include "json.hpp"
 #include <string>
 #include "spline.hpp"  // used to smooth out path instead of fitting polynomial
+#include "ego_vehicle.hpp"
 
 using namespace std;
 
@@ -251,13 +252,22 @@ int main() {
                         string event = j[0].get<string>();
 
                         if (event == "telemetry") {
+                            ego_vehicle car;
+
+                            car.setCar_x(j[1]["x"]);
+                            car.setCar_y(j[1]["y"]);
+                            car.setCar_s(j[1]["s"]);
+                            car.setCar_d(j[1]["d"]);
+                            car.setCar_yaw(j[1]["yaw"]);
+                            car.setCar_speed(j[1]["speed"]);
+
                             // Main car's localization Data
-                            double car_x = j[1]["x"];
-                            double car_y = j[1]["y"];
-                            double car_s = j[1]["s"];
-                            double car_d = j[1]["d"];
-                            double car_yaw = j[1]["yaw"];
-                            double car_speed = j[1]["speed"];
+//                            double car_x = j[1]["x"];
+//                            double car_y = j[1]["y"];
+//                            double car_s = j[1]["s"];
+//                            double car_d = j[1]["d"];
+//                            double car_yaw = j[1]["yaw"];
+//                            double car_speed = j[1]["speed"];
 
                             // Previous path data given to the Planner
                             auto previous_path_x = j[1]["previous_path_x"];
@@ -281,9 +291,12 @@ int main() {
                             // Either we will reference the starting point as where the car is or at the previous paths
                             // end point.
                             int next_wp = -1;
-                            double ref_x = car_x;
-                            double ref_y = car_y;
-                            double ref_yaw = deg2rad(car_yaw);
+                            //double ref_x = car_x;
+                            double ref_x = car.getCar_x();
+                            //double ref_y = car_y;
+                            double ref_y = car.getCar_y();
+                            //double ref_yaw = deg2rad(car_yaw);
+                            double ref_yaw = deg2rad(car.getCar_yaw());
 
                             // If previous size is about empty, use the car as starting reference.
                             if (prev_size < 2) {
@@ -298,12 +311,15 @@ int main() {
                                 next_wp = NextWaypoint(ref_x, ref_y, ref_yaw, map_waypoints_x, map_waypoints_y,
                                                        map_waypoints_dx, map_waypoints_dy);
 
-                                car_s = end_path_s;
+                                //car_s = end_path_s;
+                                car.setCar_s(end_path_s);
 
                                 // speed = sqrt(distance^2 / time) in metres per second
                                 // see http://mathworld.wolfram.com/Acceleration.html
-                                car_speed = (sqrt((ref_x - ref_x_prev) * (ref_x - ref_x_prev) +
-                                                  (ref_y - ref_y_prev) * (ref_y - ref_y_prev)) / .02) * 2.2352;
+                                //car_speed = (sqrt((ref_x - ref_x_prev) * (ref_x - ref_x_prev) +
+                                //                  (ref_y - ref_y_prev) * (ref_y - ref_y_prev)) / .02) * 2.2352;
+                                car.setCar_speed((sqrt((ref_x - ref_x_prev) * (ref_x - ref_x_prev) +
+                                                       (ref_y - ref_y_prev) * (ref_y - ref_y_prev)) / .02) * 2.2352);
                             }
 
                             //find ref_v to use
@@ -319,12 +335,17 @@ int main() {
                                     double check_car_s = sensor_fusion[i][5];
                                     check_car_s += ((double) prev_size * .02 * check_speed);
                                     //check s values greater than mine and s gap
-                                    if ((check_car_s > car_s) && ((check_car_s - car_s) < 30) &&
-                                        ((check_car_s - car_s) < closestDist_s)) {
+                                    //if ((check_car_s > car_s) && ((check_car_s - car_s) < 30) &&
+                                    //    ((check_car_s - car_s) < closestDist_s)) {
 
-                                        closestDist_s = (check_car_s - car_s);
+                                    if ((check_car_s > car.getCar_s()) && ((check_car_s - car.getCar_s()) < 30) &&
+                                        ((check_car_s - car.getCar_s()) < closestDist_s)) {
 
-                                        if ((check_car_s - car_s) > 20) {
+                                            //closestDist_s = (check_car_s - car_s);
+                                            closestDist_s = (check_car_s - car.getCar_s());
+
+                                        //if ((check_car_s - car_s) > 20) {
+                                        if ((check_car_s - car.getCar_s()) > 20) {
 
                                             //match that cars speed
                                             ref_vel = check_speed * 2.2352;
@@ -357,7 +378,8 @@ int main() {
 
                                             double check_car_s = sensor_fusion[i][5];
                                             check_car_s += ((double) prev_size * .02 * check_speed);
-                                            double dist_s = check_car_s - car_s;
+                                            //double dist_s = check_car_s - car_s;
+                                            double dist_s = check_car_s - car.getCar_s();
                                             //if (dist_s < 20 && dist_s > -20) {
                                             if (dist_s < 10 && dist_s > -10) {
                                                 lane_safe = false;
@@ -383,7 +405,8 @@ int main() {
 
                                             double check_car_s = sensor_fusion[i][5];
                                             check_car_s += ((double) prev_size * .02 * check_speed);
-                                            double dist_s = check_car_s - car_s;
+                                            //double dist_s = check_car_s - car_s;
+                                            double dist_s = check_car_s - car.getCar_s();
                                             //if (dist_s < 20 && dist_s > -10) {
                                             if (dist_s < 10 && dist_s > -10) {
                                                 lane_safe = false;
@@ -405,14 +428,18 @@ int main() {
                             vector<double> ptsy;
 
                             if (prev_size < 2) {
-                                double prev_car_x = car_x - cos(car_yaw);
-                                double prev_car_y = car_y - sin(car_yaw);
+                                //double prev_car_x = car_x - cos(car_yaw);
+                                double prev_car_x = car.getCar_x() - cos(car.getCar_yaw());
+                                //double prev_car_y = car_y - sin(car_yaw);
+                                double prev_car_y = car.getCar_y() - sin(car.getCar_yaw());
 
                                 ptsx.push_back(prev_car_x);
-                                ptsx.push_back(car_x);
+                                //ptsx.push_back(car_x);
+                                ptsx.push_back(car.getCar_x());
 
                                 ptsy.push_back(prev_car_y);
-                                ptsy.push_back(car_y);
+                                //ptsy.push_back(car_y);
+                                ptsy.push_back(car.getCar_y());
                             } else {
                                 ptsx.push_back(previous_path_x[prev_size - 2]);
                                 ptsx.push_back(previous_path_x[prev_size - 1]);
@@ -424,11 +451,17 @@ int main() {
                             }
 
                             // In Frenet add evenly 30m spaced points ahead of the starting reference.
-                            vector<double> next_wp0 = getXY(car_s + 30, (2 + 4 * lane), map_waypoints_s,
+                            //vector<double> next_wp0 = getXY(car_s + 30, (2 + 4 * lane), map_waypoints_s,
+                            //                                map_waypoints_x, map_waypoints_y);
+                            //vector<double> next_wp1 = getXY(car_s + 60, (2 + 4 * lane), map_waypoints_s,
+                            //                                map_waypoints_x, map_waypoints_y);
+                            //vector<double> next_wp2 = getXY(car_s + 90, (2 + 4 * lane), map_waypoints_s,
+                            //                                map_waypoints_x, map_waypoints_y);
+                            vector<double> next_wp0 = getXY(car.getCar_s() + 30, (2 + 4 * lane), map_waypoints_s,
                                                             map_waypoints_x, map_waypoints_y);
-                            vector<double> next_wp1 = getXY(car_s + 60, (2 + 4 * lane), map_waypoints_s,
+                            vector<double> next_wp1 = getXY(car.getCar_s() + 60, (2 + 4 * lane), map_waypoints_s,
                                                             map_waypoints_x, map_waypoints_y);
-                            vector<double> next_wp2 = getXY(car_s + 90, (2 + 4 * lane), map_waypoints_s,
+                            vector<double> next_wp2 = getXY(car.getCar_s() + 90, (2 + 4 * lane), map_waypoints_s,
                                                             map_waypoints_x, map_waypoints_y);
 
                             ptsx.push_back(next_wp0[0]);
@@ -487,16 +520,30 @@ int main() {
                             // will always output 50 points.
                             for (int i = 1; i <= 50 - previous_path_x.size(); i++) {
 
-                                if (ref_vel > car_speed) {  // speed up
+                                //if (ref_vel > car_speed) {  // speed up
+                                //    car_speed += .22352;  // 0.22352 m/s = 0.5 mph
+                                //} else if (ref_vel < car_speed) {  // too close, slow down
+                                //    car_speed -= .22352;
+                                //}
+                                if (ref_vel > car.getCar_speed()) {  // speed up
+                                    double car_speed;
+                                    car_speed = car.getCar_speed();
                                     car_speed += .22352;  // 0.22352 m/s = 0.5 mph
-                                } else if (ref_vel < car_speed) {  // too close, slow down
+                                    car.setCar_speed(car_speed);
+                                } else if (ref_vel < car.getCar_speed()) {  // too close, slow down
+                                    double car_speed;
+                                    car_speed = car.getCar_speed();
                                     car_speed -= .22352;
+                                    car.setCar_speed(car_speed);
                                 }
+
 
                                 // N is the number of anchor points along the spline curve that the car will visit
                                 // every 0.02 seconds (aka simulator moves the car to next point 50 times per second).
+                                //double N = (target_dist /
+                                //            (.02 * car_speed / 2.2352));  // 2.2352 m/s = 5.0 mph
                                 double N = (target_dist /
-                                            (.02 * car_speed / 2.2352));  // 2.2352 m/s = 5.0 mph
+                                            (.02 * car.getCar_speed() / 2.2352));  // 2.2352 m/s = 5.0 mph
                                 // coverts ref_vel from MPH into metres per second.
                                 double x_point = x_add_on + (target_x) / N;
                                 double y_point = s(
