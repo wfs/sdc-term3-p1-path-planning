@@ -5,41 +5,69 @@
 #ifndef PATH_PLANNING_EGO_VEHICLE_HPP
 #define PATH_PLANNING_EGO_VEHICLE_HPP
 
+#include <vector>
+
+using namespace std;
 
 class ego_vehicle {
 
-    double car_x;
 public:
-    double getCar_x() const;
+    double getX() const;
 
-    void setCar_x(double car_x);
+    void setX(double car_x);
 
-    double getCar_y() const;
+    double getY() const;
 
-    void setCar_y(double car_y);
+    void setY(double car_y);
 
-    double getCar_s() const;
+    double getS() const;
 
-    void setCar_s(double car_s);
+    void setS(double car_s);
 
-    double getCar_d() const;
+    double getD() const;
 
-    void setCar_d(double car_d);
+    void setD(double car_d);
 
-    double getCar_yaw() const;
+    double getYaw() const;
 
-    void setCar_yaw(double car_yaw);
+    void setYaw(double car_yaw);
 
-    double getCar_speed() const;
+    double getSpeed() const;
 
-    void setCar_speed(double car_speed);
+    void setSpeed(double car_speed);
+
+
+    //const vector<double> &getPrevious_path_x() const;
+
+    //void setPrevious_path_x(const vector<double> &previous_path_x);
+
+    //const vector<double> &getPrevious_path_y() const;
+
+    //void setPrevious_path_y(const vector<double> &previous_path_y);
+
+
+    //double getEnd_path_s() const;
+
+    //void setEnd_path_s(double end_path_s);
+
+    //double getEnd_path_d() const;
+
+    //void setEnd_path_d(double end_path_d);
+
+
 
 private:
+    double car_x;
     double car_y;
     double car_s;
     double car_d;
     double car_yaw;
     double car_speed;
+    //vector<double> previous_path_x;
+    //vector<double> previous_path_y;
+    //double end_path_s;
+    //double end_path_d;
+
 
 public:
     ego_vehicle();
