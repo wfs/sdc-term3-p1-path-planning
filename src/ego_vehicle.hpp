@@ -67,6 +67,23 @@ private:
     //vector<double> previous_path_y;
     //double end_path_s;
     //double end_path_d;
+    double ref_pos_x;
+public:
+    double getRef_pos_x() const;
+
+    void setRef_pos_x(double ref_pos_x);
+
+    double getRef_pos_y() const;
+
+    void setRef_pos_y(double ref_pos_y);
+
+    double getRef_pos_yaw() const;
+
+    void setRef_pos_yaw(double ref_pos_yaw);
+
+private:
+    double ref_pos_y;
+    double ref_pos_yaw;
 
 
 public:

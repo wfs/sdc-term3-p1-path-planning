@@ -59,6 +59,30 @@ void ego_vehicle::setSpeed(double car_speed) {
     ego_vehicle::car_speed = car_speed;
 }
 
+double ego_vehicle::getRef_pos_x() const {
+    return ref_pos_x;
+}
+
+void ego_vehicle::setRef_pos_x(double ref_pos_x) {
+    ego_vehicle::ref_pos_x = ref_pos_x;
+}
+
+double ego_vehicle::getRef_pos_y() const {
+    return ref_pos_y;
+}
+
+void ego_vehicle::setRef_pos_y(double ref_pos_y) {
+    ego_vehicle::ref_pos_y = ref_pos_y;
+}
+
+double ego_vehicle::getRef_pos_yaw() const {
+    return ref_pos_yaw;
+}
+
+void ego_vehicle::setRef_pos_yaw(double ref_pos_yaw) {
+    ego_vehicle::ref_pos_yaw = ref_pos_yaw;
+}
+
 
 //const vector<double> &ego_vehicle::getPrevious_path_x() const {
 //    return previous_path_x;

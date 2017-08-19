@@ -1,12 +1,12 @@
 #include <fstream>
 #include <math.h>
 #include <uWS/uWS.h>
-#include <chrono>
+//#include <chrono>
 #include <iostream>
 #include <thread>
 #include <vector>
-#include "Eigen-3.3/Eigen/Core"
-#include "Eigen-3.3/Eigen/QR"
+//#include "Eigen-3.3/Eigen/Core"
+//#include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
 #include <string>
 #include "spline.hpp"  // smoothly fits to all polynomial trajectory points
@@ -41,6 +41,9 @@ string hasData(string s) {
 
 /**
  * Calculates Euclidean (aka straight line) distance between 2 points.
+ * NOTE : beautiful explanation by Khan Academy
+ * Example of vector magnitude from initial and terminal points
+ * https://www.youtube.com/watch?v=jfaSZhNFEOE
  */
 double distance(double x1, double y1, double x2, double y2) {
     return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
@@ -106,54 +109,59 @@ int NextWaypoint(double x, double y, double theta, vector<double> maps_x, vector
     return closestWaypoint;
 }
 
-// Transform from Cartesian x,y coordinates to Frenet s,d coordinates
-vector<double>
-getFrenet(double x, double y, double theta, vector<double> maps_x, vector<double> maps_y, vector<double> maps_dx,
-          vector<double> maps_dy) {
-    int next_wp = NextWaypoint(x, y, theta, maps_x, maps_y, maps_dx, maps_dy);
 
-    int prev_wp;
-    prev_wp = next_wp - 1;
-    if (next_wp == 0) {
-        prev_wp = maps_x.size() - 1;
-    }
+// //**
+// * Transform from Cartesian x,y coordinates to Frenet s,d coordinates
+// */
+//vector<double>
+//getFrenet(double x, double y, double theta, vector<double> maps_x, vector<double> maps_y, vector<double> maps_dx,
+//          vector<double> maps_dy) {
+//    int next_wp = NextWaypoint(x, y, theta, maps_x, maps_y, maps_dx, maps_dy);
+//
+//    int prev_wp;
+//    prev_wp = next_wp - 1;
+//    if (next_wp == 0) {
+//        prev_wp = maps_x.size() - 1;
+//    }
+//
+//    double n_x = maps_x[next_wp] - maps_x[prev_wp];
+//    double n_y = maps_y[next_wp] - maps_y[prev_wp];
+//    double x_x = x - maps_x[prev_wp];
+//    double x_y = y - maps_y[prev_wp];
+//
+//    // find the projection of x onto n
+//    double proj_norm = (x_x * n_x + x_y * n_y) / (n_x * n_x + n_y * n_y);
+//    double proj_x = proj_norm * n_x;
+//    double proj_y = proj_norm * n_y;
+//
+//    double frenet_d = distance(x_x, x_y, proj_x, proj_y);
+//
+//    //see if d value is positive or negative by comparing it to a center point
+//
+//    double center_x = 1000 - maps_x[prev_wp];
+//    double center_y = 2000 - maps_y[prev_wp];
+//    double centerToPos = distance(center_x, center_y, x_x, x_y);
+//    double centerToRef = distance(center_x, center_y, proj_x, proj_y);
+//
+//    if (centerToPos <= centerToRef) {
+//        frenet_d *= -1;
+//    }
+//
+//    // calculate s value
+//    double frenet_s = 0;
+//    for (int i = 0; i < prev_wp; i++) {
+//        frenet_s += distance(maps_x[i], maps_y[i], maps_x[i + 1], maps_y[i + 1]);
+//    }
+//
+//    frenet_s += distance(0, 0, proj_x, proj_y);
+//
+//    return {frenet_s, frenet_d};
+//
+//}
 
-    double n_x = maps_x[next_wp] - maps_x[prev_wp];
-    double n_y = maps_y[next_wp] - maps_y[prev_wp];
-    double x_x = x - maps_x[prev_wp];
-    double x_y = y - maps_y[prev_wp];
-
-    // find the projection of x onto n
-    double proj_norm = (x_x * n_x + x_y * n_y) / (n_x * n_x + n_y * n_y);
-    double proj_x = proj_norm * n_x;
-    double proj_y = proj_norm * n_y;
-
-    double frenet_d = distance(x_x, x_y, proj_x, proj_y);
-
-    //see if d value is positive or negative by comparing it to a center point
-
-    double center_x = 1000 - maps_x[prev_wp];
-    double center_y = 2000 - maps_y[prev_wp];
-    double centerToPos = distance(center_x, center_y, x_x, x_y);
-    double centerToRef = distance(center_x, center_y, proj_x, proj_y);
-
-    if (centerToPos <= centerToRef) {
-        frenet_d *= -1;
-    }
-
-    // calculate s value
-    double frenet_s = 0;
-    for (int i = 0; i < prev_wp; i++) {
-        frenet_s += distance(maps_x[i], maps_y[i], maps_x[i + 1], maps_y[i + 1]);
-    }
-
-    frenet_s += distance(0, 0, proj_x, proj_y);
-
-    return {frenet_s, frenet_d};
-
-}
-
-// Transform from Frenet s,d coordinates to Cartesian x,y
+/**
+ * Transform from Frenet s,d coordinates to Cartesian x,y
+ */
 vector<double> getXY(double s, double d, vector<double> maps_s, vector<double> maps_x, vector<double> maps_y) {
     int prev_wp = -1;
 
@@ -179,7 +187,53 @@ vector<double> getXY(double s, double d, vector<double> maps_s, vector<double> m
 
 }
 
-// Used by Catch BDD-Style test
+void updateEgoCarLocalisation(int & prev_traj_path_list_size, int & next_waypoint, vector<double> & prev_traj_path_x,
+                              ego_vehicle & ego_car,
+                              vector<double> & map_waypoints_x,
+                              vector<double> & map_waypoints_y, vector<double> & map_waypoints_dx,
+                              vector<double> & map_waypoints_dy, vector<double> & prev_traj_path_y,
+                              double & prev_traj_path_end_s_val) {
+
+    // Setup reference position.
+    // Either we will reference the starting point as where the car is or at the previous paths
+    // end point.
+    ego_car.setRef_pos_x(ego_car.getX());
+    ego_car.setRef_pos_y(ego_car.getY());
+    ego_car.setRef_pos_yaw(deg2rad(ego_car.getYaw()));
+
+
+    // If previous size is about empty, use the car as starting reference.
+    if (prev_traj_path_list_size < 2) {
+        next_waypoint = NextWaypoint(ego_car.getRef_pos_x(), ego_car.getRef_pos_y(), ego_car.getRef_pos_yaw(),
+                                     map_waypoints_x, map_waypoints_y,
+                                     map_waypoints_dx, map_waypoints_dy);
+
+    } else {  // Use the previous path's end point as the starting reference
+        ego_car.setRef_pos_x(prev_traj_path_x[prev_traj_path_list_size - 1]);
+        double prev_ref_pos_x = prev_traj_path_x[
+                prev_traj_path_list_size - 2];
+        ego_car.setRef_pos_y(prev_traj_path_y[prev_traj_path_list_size - 1]);
+        double prev_ref_pos_y = prev_traj_path_y[
+                prev_traj_path_list_size - 2];
+        ego_car.setRef_pos_yaw(atan2(ego_car.getRef_pos_y() - prev_ref_pos_y,
+                                             ego_car.getRef_pos_x() - prev_ref_pos_x));
+        next_waypoint = NextWaypoint(ego_car.getRef_pos_x(), ego_car.getRef_pos_y(), ego_car.getRef_pos_yaw(),
+                                     map_waypoints_x, map_waypoints_y,
+                                     map_waypoints_dx, map_waypoints_dy);
+
+        ego_car.setS(prev_traj_path_end_s_val);
+
+        ego_car.setSpeed((sqrt((ego_car.getRef_pos_x() - prev_ref_pos_x) *
+                               (ego_car.getRef_pos_x() - prev_ref_pos_x) +
+                               (ego_car.getRef_pos_y() - prev_ref_pos_y) *
+                               (ego_car.getRef_pos_y() - prev_ref_pos_y)) / .02) *
+                         2.2352);
+    }
+}
+
+/**
+ * Used by Catch BDD-Style test
+ */
 /*
 std::string showMessage() {
     //std::cout << "Hello, World!" << std::endl;
@@ -230,9 +284,11 @@ int main() {
     int lane_change_wp = 0;
 
     /**
-     * LOCALISATION / TELEMETRY (co-ordinates, yaw angle, speed) &
-     * SENSOR FUSION (all other cars travelling in our direction) :
-     * Simulator tells us the x,y and s,d coordinates along with the car's angle and speed on each message.
+     * LOCALISATION : uses map waypoints of motorway centre,
+     * TELEMETRY : ego car co-ordinates in cartesian (x, y) and frenet (s, d) 2D space systems, yaw angle, speed, and
+     * SENSOR FUSION : all other cars travelling in our direction.
+     *
+     * Simulator tells us ego car's telemetry, previous trajectory co-ordinates, and sensor fusion on each new message.
      */
     h.onMessage(
             [&map_waypoints_x, &map_waypoints_y, &map_waypoints_s, &map_waypoints_dx, &map_waypoints_dy, &lane, &lane_change_wp](
@@ -263,8 +319,8 @@ int main() {
                             ego_car.setSpeed(j[1]["speed"]);
 
                             // Previous path data given to the Trajectory Planner
-                            auto prev_traj_path_x = j[1]["previous_path_x"];
-                            auto prev_traj_path_y = j[1]["previous_path_y"];
+                            vector<double> prev_traj_path_x = j[1]["previous_path_x"];
+                            vector<double> prev_traj_path_y = j[1]["previous_path_y"];
 
                             // Previous path's end s and d values
                             double prev_traj_path_end_s_val = j[1]["end_path_s"];
@@ -279,44 +335,13 @@ int main() {
                             // transition.
                             int prev_traj_path_list_size = prev_traj_path_x.size();
 
-                            // Setup reference position.
-                            // Either we will reference the starting point as where the car is or at the previous paths
-                            // end point.
                             int next_waypoint = -1;
-                            double ref_pos_x = ego_car.getX();
-                            double ref_pos_y = ego_car.getY();
-                            double ref_pos_yaw = deg2rad(ego_car.getYaw());
 
-                            // If previous size is about empty, use the car as starting reference.
-                            if (prev_traj_path_list_size < 2) {
-                                next_waypoint = NextWaypoint(ref_pos_x, ref_pos_y,
-                                                             ref_pos_yaw, map_waypoints_x, map_waypoints_y,
-                                                             map_waypoints_dx, map_waypoints_dy);
-                            } else {  // Use the previous path's end point as the starting reference
-                                ref_pos_x = prev_traj_path_x[prev_traj_path_list_size -
-                                                             1];
-                                double prev_ref_pos_x = prev_traj_path_x[
-                                        prev_traj_path_list_size - 2];
-                                ref_pos_y = prev_traj_path_y[prev_traj_path_list_size -
-                                                             1];
-                                double prev_ref_pos_y = prev_traj_path_y[
-                                        prev_traj_path_list_size - 2];
-                                ref_pos_yaw = atan2(ref_pos_y - prev_ref_pos_y,
-                                                    ref_pos_x - prev_ref_pos_x);
-                                next_waypoint = NextWaypoint(ref_pos_x, ref_pos_y,
-                                                             ref_pos_yaw, map_waypoints_x, map_waypoints_y,
-                                                             map_waypoints_dx, map_waypoints_dy);
-
-                                ego_car.setS(prev_traj_path_end_s_val);
-
-                                // speed = sqrt(distance^2 / time) in metres per second
-                                // see http://mathworld.wolfram.com/Acceleration.html
-                                ego_car.setSpeed((sqrt((ref_pos_x - prev_ref_pos_x) *
-                                                       (ref_pos_x - prev_ref_pos_x) +
-                                                       (ref_pos_y - prev_ref_pos_y) *
-                                                       (ref_pos_y - prev_ref_pos_y)) / .02) *
-                                                 2.2352);
-                            }
+                            updateEgoCarLocalisation(prev_traj_path_list_size, next_waypoint, prev_traj_path_x, ego_car,
+                                                     map_waypoints_x,
+                                                     map_waypoints_y, map_waypoints_dx,
+                                                     map_waypoints_dy, prev_traj_path_y,
+                                                     prev_traj_path_end_s_val);
 
                             //find best target velocity to use
                             double closest_dist_s = 100000;  // far away
@@ -348,7 +373,7 @@ int main() {
                                     double check_car_s = sensor_fusion[i][5];
                                     check_car_s += ((double) prev_traj_path_list_size * .02 * check_speed);
 
-                                    //c heck s values greater than mine and s gap
+                                    // check s values greater than mine and s gap
                                     // traffic car ahead of us is within our 30 point trajectory line
                                     if ((check_car_s > ego_car.getS()) && ((check_car_s - ego_car.getS()) < 30) &&
                                         ((check_car_s - ego_car.getS()) < closest_dist_s)) {
@@ -482,13 +507,14 @@ int main() {
                             for (int i = 0; i < ptsx.size(); i++) {
 
                                 //shift car reference angle to 0 degrees
-                                double shift_x = ptsx[i] - ref_pos_x;
-                                double shift_y = ptsy[i] - ref_pos_y;
+                                double shift_x = ptsx[i] - ego_car.getRef_pos_x();
+                                double shift_y = ptsy[i] - ego_car.getRef_pos_y();
 
-                                ptsx[i] = (shift_x * cos(0 - ref_pos_yaw) -
-                                           shift_y * sin(0 - ref_pos_yaw));
-                                ptsy[i] = (shift_x * sin(0 - ref_pos_yaw) +
-                                           shift_y * cos(0 - ref_pos_yaw));
+                                ptsx[i] = (shift_x * cos(0 - ego_car.getRef_pos_yaw()) -
+                                           shift_y * sin(0 - ego_car.getRef_pos_yaw()));
+
+                                ptsy[i] = (shift_x * sin(0 - ego_car.getRef_pos_yaw()) +
+                                           shift_y * cos(0 - ego_car.getRef_pos_yaw()));
 
                             }
 
@@ -554,11 +580,13 @@ int main() {
                                 double y_ref = y_point;
 
                                 // Rotate back to normal after rotating it earlier.
-                                x_point = (x_ref * cos(ref_pos_yaw) - y_ref * sin(ref_pos_yaw));
-                                y_point = (x_ref * sin(ref_pos_yaw) + y_ref * cos(ref_pos_yaw));
+                                x_point = (x_ref * cos(ego_car.getRef_pos_yaw()) -
+                                           y_ref * sin(ego_car.getRef_pos_yaw()));
+                                y_point = (x_ref * sin(ego_car.getRef_pos_yaw()) +
+                                           y_ref * cos(ego_car.getRef_pos_yaw()));
 
-                                x_point += ref_pos_x;
-                                y_point += ref_pos_y;
+                                x_point += ego_car.getRef_pos_x();
+                                y_point += ego_car.getRef_pos_y();
 
 
                                 next_x_vals.push_back(x_point);
