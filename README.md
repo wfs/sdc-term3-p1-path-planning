@@ -15,7 +15,7 @@
 
 ## 2. Valid Trajectories
 ### 2.1. Drive at least 1 lap without incident
-[Success](./data/one_lap.png)
+![Success](./data/one_lap.png)
 
 ### 2.2. Drive to speed limit
 1. Reference velocity is set to just under the legal limit of 50 MPH (line 354 in main.cpp). 
@@ -60,7 +60,7 @@ Use this new car reference to create an initial spline trajectory aimed at the l
 constraints are not violated (see lines 582-624 in main.cpp). Finally rotate car back to normal orientation 
 (see lines 626-642 in main.cpp).
 
-[spline : mapping given x to y co-ordinates](./data/spline_anchors_sketch.png)
+![spline : mapping given x to y co-ordinates](./data/spline_anchors_sketch.png)
 
 ---
 
