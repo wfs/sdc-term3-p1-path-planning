@@ -1,5 +1,4 @@
----
-# Project Specification Review
+# Project Rubic
 ## 1. Code compiles
 
     ```bash
@@ -19,18 +18,49 @@
 [Success](./data/one_lap.png)
 
 ### 2.2. Drive to speed limit
-1. Reference velocity is set to just under the legal limit of 50 MPH (line 274 in main.cpp). Also, the spacing between the 'anchor points' along the spline curve is adjusted to ensure
-that the target ```ref_vel``` is not exceeded (lines 496-504 in main.cpp).
+1. Reference velocity is set to just under the legal limit of 50 MPH (line 354 in main.cpp). 
+Also, the spacing between the 'anchor points' along the spline curve is adjusted to ensure
+that the target is not exceeded (lines 613-617 in main.cpp).
 
 ```objectivec
-double ref_vel = 49.5; //mph
+double target_velocity = 47; // MPH
 ```
 
-2. Maximum acceleration (10 m/s^2) is not exceeded due to low incremental acceleration / deceleration 
-(see lines 490-494). Maximum jerk (10 m/s^3) is not exceeded due to the spline (see line 455 in main.cpp) mapping a very smooth trajectory to the target
-lane resulting in low jerk values during lane change.
+2. Maximum acceleration (10 m/s^2) and maximum jerk (10 m/s^3) is not exceeded due to low incremental 
+acceleration / deceleration (see lines 413-425 in main.cpp) and smooth spline trajectories (see lines 582-624
+in main.cpp) when implementing trajectory to meet the required lane changing behaviour.
 
-3. Car does not have collisions TODO
+3. Car does not have collisions as can be seen in 1 lap [youtube video](https://youtu.be/OH-Do6LAaK8) due to 
+```text
+BEHAVIOUR 1 : "Keep safe distance from closest car in front of ego car."
+```
+(see lines 404-426 in main.cpp).
+
+4. The car stays in its lane, except for the time between changing lanes. Note : there are some map 
+inaccuracies which causes the car to ride the lane line on some corners.
+
+5. The car is able to change lanes as required by the BEHAVIOUR rules (see lines 432, 469) :
+```text
+BEHAVIOUR 2 : "Overtake slower cars, using left lanes."
+BEHAVIOUR 3 : "Overtake slower cars, using right lanes."
+```
+## 3. Model Documentation
+### How to generate paths
+Create a new trajectory vector of (x, y) co-ordinates using the last 2 points from the previous trajectory
+run by the simulator (see lines 508-532 in main.cpp).
+
+Add evenly spaced points out 30m, 60m and 90m ahead of the ego car's current location (see lines 534-549 in
+main.cpp).
+
+Shift the ego car's current reference angle to 0-degrees aka facing along the x-axis and store in 'ptsx'
+ and 'ptsy' vectors (see lines 507-564 in main.cpp).
+ 
+Use this new car reference to create an initial spline trajectory aimed at the lane centre (see lines 
+566-580 in main.cpp) and then calculate spline 'anchor' points, spaced so that maximum acceleration and jerk
+constraints are not violated (see lines 582-624 in main.cpp). Finally rotate car back to normal orientation 
+(see lines 626-642 in main.cpp).
+
+[spline : mapping given x to y co-ordinates](./data/spline_anchors_sketch.png)
 
 ---
 

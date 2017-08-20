@@ -581,11 +581,11 @@ int main() {
 
                             // Calculate how to break up spline points so that we travel at our desired
                             // reference velocity and avoid jerk violation.
-                            double target_x = 34.0;  // Our horizon along x-axis. Smaller than 34 values
+                            double target_x = 30.0;  // Our horizon along x-axis. Smaller than 30 values
                             // will cause the car to drive up too close to the car in front before changing lanes.
                             double target_y = s(
                                     target_x);  // ask spline what is the corresponding y-value for the given x-value
-                            target_y += 0.34;  // adjust by 34 cm to right to compensate for map inaccuracy.
+                            //target_y += 0.34;  // adjust by 34 cm to right to compensate for map inaccuracy.
                             double target_dist = sqrt(
                                     (target_x) * (target_x) + (target_y) * (target_y));  // Distance from either the car
                             // or the last point in previous path to this target.

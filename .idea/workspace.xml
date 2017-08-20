@@ -12,8 +12,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eca6654d-786f-4fa4-b688-ae0d40ebcef5" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/path_planning" afterPath="$PROJECT_DIR$/cmake-build-debug/path_planning" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/spline_anchors_sketch.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main.cpp" afterPath="$PROJECT_DIR$/src/main.cpp" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -48,17 +49,40 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main.cpp" pinned="false" current-in-tab="true">
+      <file leaf-file-name="main.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="586" column="89" lean-forward="false" selection-start-line="586" selection-start-column="89" selection-end-line="586" selection-end-column="89" />
+            <state relative-caret-position="110">
+              <caret line="616" column="79" lean-forward="true" selection-start-line="616" selection-start-column="79" selection-end-line="616" selection-end-column="79" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
                 <element signature="e#78#97#0" expanded="true" />
                 <element signature="e#200#219#0" expanded="true" />
                 <element signature="e#2078#3479#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="306">
+                <caret line="47" column="25" lean-forward="true" selection-start-line="47" selection-start-column="25" selection-end-line="47" selection-end-column="25" />
+                <folding />
+              </first_editor>
+              <second_editor />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="how_to_make_movie_and_gif.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/how_to_make_movie_and_gif.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -99,15 +123,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>getXY</find>
-      <find>updateEgoCarLocalisation</find>
-      <find>ref_</find>
-      <find>prev_traj_path_list_size</find>
-      <find>next_waypoint</find>
-      <find>previous_path_x</find>
-      <find>ego_vehicle_car</find>
-      <find>prev_traj_path_end_s_val</find>
-      <find>line</find>
       <find>map_waypoints_x</find>
       <find>sensor_fusion</find>
       <find>.02</find>
@@ -118,8 +133,6 @@
       <find>2.235</find>
       <find>max_s</find>
       <find>traffic</find>
-      <find>ptsx</find>
-      <find>x_add_on</find>
       <find>getRef_pos_yaw</find>
       <find>ego_car.setD</find>
       <find>ego_car.getD</find>
@@ -128,7 +141,18 @@
       <find>30</find>
       <find>49.5</find>
       <find>55</find>
+      <find>speed</find>
+      <find>47</find>
       <find>34</find>
+      <find>.34</find>
+      <find>beha</find>
+      <find>shift_x</find>
+      <find>setRef_pos_y</find>
+      <find>updateEgoCarLocalisation</find>
+      <find>prev_traj_path_x</find>
+      <find>ptsx</find>
+      <find>target_dist</find>
+      <find>x_add_on</find>
     </findStrings>
     <replaceStrings>
       <replace>2.2352</replace>
@@ -144,7 +168,6 @@
       <list>
         <option value="$PROJECT_DIR$/src/catch.hpp" />
         <option value="$PROJECT_DIR$/src/spline.hpp" />
-        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/src/traffic_vehicles.cpp" />
         <option value="$PROJECT_DIR$/src/traffic_vehicles.hpp" />
         <option value="$PROJECT_DIR$/src/traffic_vehicle.hpp" />
@@ -159,6 +182,7 @@
         <option value="$PROJECT_DIR$/src/ego_vehicle.cpp" />
         <option value="$PROJECT_DIR$/src/ego_vehicle.hpp" />
         <option value="$PROJECT_DIR$/src/main.cpp" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -254,12 +278,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1502259876214</updated>
-      <workItem from="1502259878375" duration="105019000" />
+      <workItem from="1502259878375" duration="113477000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="105019000" />
+    <option name="totallyTimeSpent" value="113477000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1985" y="-4" width="1855" height="1084" extended-state="6" />
@@ -270,7 +294,7 @@
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24408603" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24408603" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1310116" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -297,16 +321,31 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/main.cpp</url>
-          <line>631</line>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/main.cpp</url>
           <line>328</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/main.cpp</url>
+          <line>555</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/main.cpp</url>
+          <line>623</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/main.cpp</url>
+          <line>565</line>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/main.cpp</url>
+          <line>581</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="14" />
+      <option name="time" value="18" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -558,17 +597,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="-634">
-            <caret line="32" column="36" lean-forward="false" selection-start-line="32" selection-start-column="36" selection-end-line="32" selection-end-column="36" />
-            <folding />
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/data/highway_map.csv">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -667,16 +695,35 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/how_to_make_movie_and_gif.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="586" column="89" lean-forward="false" selection-start-line="586" selection-start-column="89" selection-end-line="586" selection-end-column="89" />
+        <state relative-caret-position="110">
+          <caret line="616" column="79" lean-forward="true" selection-start-line="616" selection-start-column="79" selection-end-line="616" selection-end-column="79" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
             <element signature="e#78#97#0" expanded="true" />
             <element signature="e#200#219#0" expanded="true" />
             <element signature="e#2078#3479#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="306">
+            <caret line="47" column="25" lean-forward="true" selection-start-line="47" selection-start-column="25" selection-end-line="47" selection-end-column="25" />
+            <folding />
+          </first_editor>
+          <second_editor />
         </state>
       </provider>
     </entry>
