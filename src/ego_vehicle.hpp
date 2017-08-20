@@ -37,25 +37,6 @@ public:
     void setSpeed(double car_speed);
 
 
-    //const vector<double> &getPrevious_path_x() const;
-
-    //void setPrevious_path_x(const vector<double> &previous_path_x);
-
-    //const vector<double> &getPrevious_path_y() const;
-
-    //void setPrevious_path_y(const vector<double> &previous_path_y);
-
-
-    //double getEnd_path_s() const;
-
-    //void setEnd_path_s(double end_path_s);
-
-    //double getEnd_path_d() const;
-
-    //void setEnd_path_d(double end_path_d);
-
-
-
 private:
     double car_x;
     double car_y;
@@ -63,10 +44,6 @@ private:
     double car_d;
     double car_yaw;
     double car_speed;
-    //vector<double> previous_path_x;
-    //vector<double> previous_path_y;
-    //double end_path_s;
-    //double end_path_d;
     double ref_pos_x;
 public:
     double getRef_pos_x() const;
@@ -90,7 +67,6 @@ public:
     ego_vehicle();
 
     virtual ~ego_vehicle();
-
 
 
 };

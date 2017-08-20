@@ -11,6 +11,7 @@
 #include <string>
 #include "spline.hpp"  // smoothly fits to all polynomial trajectory points
 #include "ego_vehicle.hpp"
+#include "traffic.hpp"
 
 using namespace std;
 
@@ -187,13 +188,13 @@ vector<double> getXY(double s, double d, vector<double> maps_s, vector<double> m
 
 }
 
-void updateEgoCarLocalisation(int & prev_traj_path_list_size, int & next_waypoint, vector<double> & prev_traj_path_x,
-                              ego_vehicle & ego_car,
-                              vector<double> & map_waypoints_x,
-                              vector<double> & map_waypoints_y, vector<double> & map_waypoints_dx,
-                              vector<double> & map_waypoints_dy, vector<double> & prev_traj_path_y,
-                              double & prev_traj_path_end_s_val) {
-
+void updateEgoCarLocalisation(int &prev_traj_path_list_size, int &next_waypoint, double move_to_next_waypoint_in_secs,
+                              vector<double> &prev_traj_path_x,
+                              ego_vehicle &ego_car,
+                              vector<double> map_waypoints_x,
+                              vector<double> map_waypoints_y, vector<double> map_waypoints_dx,
+                              vector<double> map_waypoints_dy, vector<double> prev_traj_path_y,
+                              double &prev_traj_path_end_s_val) {
     // Setup reference position.
     // Either we will reference the starting point as where the car is or at the previous paths
     // end point.
@@ -216,7 +217,7 @@ void updateEgoCarLocalisation(int & prev_traj_path_list_size, int & next_waypoin
         double prev_ref_pos_y = prev_traj_path_y[
                 prev_traj_path_list_size - 2];
         ego_car.setRef_pos_yaw(atan2(ego_car.getRef_pos_y() - prev_ref_pos_y,
-                                             ego_car.getRef_pos_x() - prev_ref_pos_x));
+                                     ego_car.getRef_pos_x() - prev_ref_pos_x));
         next_waypoint = NextWaypoint(ego_car.getRef_pos_x(), ego_car.getRef_pos_y(), ego_car.getRef_pos_yaw(),
                                      map_waypoints_x, map_waypoints_y,
                                      map_waypoints_dx, map_waypoints_dy);
@@ -226,8 +227,8 @@ void updateEgoCarLocalisation(int & prev_traj_path_list_size, int & next_waypoin
         ego_car.setSpeed((sqrt((ego_car.getRef_pos_x() - prev_ref_pos_x) *
                                (ego_car.getRef_pos_x() - prev_ref_pos_x) +
                                (ego_car.getRef_pos_y() - prev_ref_pos_y) *
-                               (ego_car.getRef_pos_y() - prev_ref_pos_y)) / .02) *
-                         2.2352);
+                               (ego_car.getRef_pos_y() - prev_ref_pos_y)) / move_to_next_waypoint_in_secs) *
+                         2.2352);  // 2.2352 m/s = 5.0 mph
     }
 }
 
@@ -244,6 +245,9 @@ std::string showMessage() {
 int main() {
     uWS::Hub h;
 
+    // create simulator map
+    //simulator_map map;
+
     // Load up map values for waypoint's x,y,s and d normalized normal vectors
     vector<double> map_waypoints_x;
     vector<double> map_waypoints_y;
@@ -253,8 +257,10 @@ int main() {
 
     // Waypoint map to read from
     string map_file_ = "../data/highway_map.csv";
+
+
     // The max s value before wrapping around the track back to 0
-    double max_s = 6945.554;
+    double max_s = 6945.554;  // note : 'max_s' is never used.
 
     ifstream in_map_(map_file_.c_str(), ifstream::in);
 
@@ -292,6 +298,7 @@ int main() {
      */
     h.onMessage(
             [&map_waypoints_x, &map_waypoints_y, &map_waypoints_s, &map_waypoints_dx, &map_waypoints_dy, &lane, &lane_change_wp](
+                    //[&lane, &lane_change_wp](
                     uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                     uWS::OpCode opCode) {
                 // "42" at the start of the message means there's a websocket message event.
@@ -331,13 +338,18 @@ int main() {
 
                             double target_velocity = 49.5; //mph
 
+                            /// simulator moves the car to next point 50 times per second.
+                            double move_ego_car_to_next_waypoint_in_seconds = 0.02; //every 20 milliseconds.
+
                             // A previous list of points that the car was following and will help us when doing a
                             // transition.
                             int prev_traj_path_list_size = prev_traj_path_x.size();
 
                             int next_waypoint = -1;
 
-                            updateEgoCarLocalisation(prev_traj_path_list_size, next_waypoint, prev_traj_path_x, ego_car,
+                            updateEgoCarLocalisation(prev_traj_path_list_size, next_waypoint,
+                                                     move_ego_car_to_next_waypoint_in_seconds, prev_traj_path_x,
+                                                     ego_car,
                                                      map_waypoints_x,
                                                      map_waypoints_y, map_waypoints_dx,
                                                      map_waypoints_dy, prev_traj_path_y,
@@ -364,14 +376,15 @@ int main() {
                                  */
                                 if (d < (2 + 4 * lane + 2) && d > (2 + 4 * lane - 2)) {
                                     // this sensed car is travelling somewhere inside the ego car's lane
-                                    double vx = sensor_fusion[i][3];
-                                    double vy = sensor_fusion[i][4];
-                                    // speed = sqrt(distance^2 / time) * m/s
-                                    // See speed formula at top of Acceleration defintion from link below :
-                                    // http://mathworld.wolfram.com/Acceleration.html
-                                    double check_speed = sqrt(vx * vx + vy * vy);
-                                    double check_car_s = sensor_fusion[i][5];
-                                    check_car_s += ((double) prev_traj_path_list_size * .02 * check_speed);
+                                    traffic car_in_my_lane;
+
+                                    car_in_my_lane.setVx(sensor_fusion[i][3]);
+                                    car_in_my_lane.setVy(sensor_fusion[i][4]);
+                                    car_in_my_lane.setS(sensor_fusion[i][5]);
+
+                                    double check_car_s = car_in_my_lane.getS();
+                                    check_car_s += car_in_my_lane.calculateS(prev_traj_path_list_size,
+                                                                             move_ego_car_to_next_waypoint_in_seconds);
 
                                     // check s values greater than mine and s gap
                                     // traffic car ahead of us is within our 30 point trajectory line
@@ -384,11 +397,13 @@ int main() {
                                         if ((check_car_s - ego_car.getS()) > 20) {
 
                                             //match that cars speed
-                                            target_velocity = check_speed * 2.2352;
+                                            target_velocity =
+                                                    car_in_my_lane.checkSpeed() * 2.2352;  // 2.2352 m/s = 5.0 mph
                                             change_lanes = true;
                                         } else {  // traffic car is too close ... slow down.
                                             //go slightly slower than the cars speed
-                                            target_velocity = check_speed * 2.2352 - 5;
+                                            target_velocity =
+                                                    car_in_my_lane.checkSpeed() * 2.2352 - 5;  // 2.2352 m/s = 5.0 mph
                                             change_lanes = true;
 
                                         }
@@ -408,13 +423,16 @@ int main() {
                                         float d = sensor_fusion[i][6];
                                         if (d < (2 + 4 * (lane - 1) + 2) && d > (2 + 4 * (lane - 1) - 2)) {
                                             //car is in left lane
-                                            double vx = sensor_fusion[i][3];
-                                            double vy = sensor_fusion[i][4];
-                                            double check_speed = sqrt(vx * vx + vy * vy);
+                                            traffic car_in_my_lane;
 
-                                            double check_car_s = sensor_fusion[i][5];
-                                            check_car_s += ((double) prev_traj_path_list_size * .02 *
-                                                            check_speed);
+                                            car_in_my_lane.setVx(sensor_fusion[i][3]);
+                                            car_in_my_lane.setVy(sensor_fusion[i][4]);
+                                            car_in_my_lane.setS(sensor_fusion[i][5]);
+
+                                            double check_car_s = car_in_my_lane.getS();
+                                            check_car_s += car_in_my_lane.calculateS(prev_traj_path_list_size,
+                                                                                     move_ego_car_to_next_waypoint_in_seconds);
+
                                             double dist_s = check_car_s - ego_car.getS();
 
                                             // Next line made ego car too aggressive : tail-gating before lane change.
@@ -437,14 +455,16 @@ int main() {
                                         float d = sensor_fusion[i][6];
                                         if (d < (2 + 4 * (lane + 1) + 2) && d > (2 + 4 * (lane + 1) - 2)) {
                                             //car is in right lane
-                                            double vx = sensor_fusion[i][3];
-                                            double vy = sensor_fusion[i][4];
-                                            double check_speed = sqrt(vx * vx + vy * vy);
+                                            traffic car_in_my_lane;
 
-                                            double check_car_s = sensor_fusion[i][5];
-                                            check_car_s += ((double) prev_traj_path_list_size * .02 *
-                                                            check_speed);
-                                            //double dist_s = check_car_s - car_s;
+                                            car_in_my_lane.setVx(sensor_fusion[i][3]);
+                                            car_in_my_lane.setVy(sensor_fusion[i][4]);
+                                            car_in_my_lane.setS(sensor_fusion[i][5]);
+
+                                            double check_car_s = car_in_my_lane.getS();
+                                            check_car_s += car_in_my_lane.calculateS(prev_traj_path_list_size,
+                                                                                     move_ego_car_to_next_waypoint_in_seconds);
+
                                             double dist_s = check_car_s - ego_car.getS();
 
                                             // Next line made ego car too aggressive : tail-gating before lane change.
@@ -567,7 +587,10 @@ int main() {
                                 // N is the number of anchor points along the spline curve that the car will visit
                                 // every 0.02 seconds (aka simulator moves the car to next point 50 times per second).
                                 double N = (target_dist /
-                                            (.02 * ego_car.getSpeed() / 2.2352));  // 2.2352 m/s = 5.0 mph
+                                            (move_ego_car_to_next_waypoint_in_seconds * ego_car.getSpeed() /
+                                             2.2352));  // 2.2352 m/s = 5.0 mph
+
+
                                 // coverts target_velocity from MPH into metres per second.
                                 double x_point = x_add_on + (target_x) / N;
                                 double y_point = s(

@@ -11,9 +11,7 @@ set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 #set(sources src/test_main.cpp)
 
 # Udacity provided boiler-plate code
-#set(sources src/main.cpp src/spline.hpp src/ego_vehicle.cpp src/ego_vehicle.hpp src/traffic.cpp src/traffic.hpp src/map.cpp src/map.hpp)
-set(sources src/main.cpp src/spline.hpp src/ego_vehicle.cpp src/ego_vehicle.hpp)
-
+set(sources src/main.cpp src/spline.hpp src/ego_vehicle.cpp src/ego_vehicle.hpp src/traffic.cpp src/traffic.hpp)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 

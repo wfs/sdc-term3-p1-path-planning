@@ -83,36 +83,3 @@ void ego_vehicle::setRef_pos_yaw(double ref_pos_yaw) {
     ego_vehicle::ref_pos_yaw = ref_pos_yaw;
 }
 
-
-//const vector<double> &ego_vehicle::getPrevious_path_x() const {
-//    return previous_path_x;
-//}
-
-//void ego_vehicle::setPrevious_path_x(const vector<double> &previous_path_x) {
-//    ego_vehicle::previous_path_x = previous_path_x;
-//}
-
-//const vector<double> &ego_vehicle::getPrevious_path_y() const {
-//    return previous_path_y;
-//}
-
-//void ego_vehicle::setPrevious_path_y(const vector<double> &previous_path_y) {
-//    ego_vehicle::previous_path_y = previous_path_y;
-//}
-
-
-//double ego_vehicle::getEnd_path_s() const {
-//    return end_path_s;
-//}
-
-//void ego_vehicle::setEnd_path_s(double end_path_s) {
-//    ego_vehicle::end_path_s = end_path_s;
-//}
-
-//double ego_vehicle::getEnd_path_d() const {
-//    return end_path_d;
-//}
-
-//void ego_vehicle::setEnd_path_d(double end_path_d) {
-//    ego_vehicle::end_path_d = end_path_d;
-//}
