@@ -8,6 +8,7 @@
 //#include "Eigen-3.3/Eigen/Core"
 //#include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
+#include <sstream>
 #include <string>
 #include "spline.hpp"  // smoothly fits to all polynomial trajectory points
 #include "ego_vehicle.hpp"
@@ -322,6 +323,20 @@ int main() {
                             ego_car.setY(j[1]["y"]);
                             ego_car.setS(j[1]["s"]);
                             ego_car.setD(j[1]["d"]);
+
+                            // Console output 'd' value
+                            //ostringstream d_before;
+                            //d_before << ego_car.getD();
+                            //cout << "before : " + d_before.str() << endl;
+
+                            // Adjust ego car d to right by 34 cm to fix simulator glitch.
+                            //ego_car.setD(ego_car.getD() + 0.34);
+
+                            // Console output 'd' value
+                            //ostringstream d_after;
+                            //d_after << ego_car.getD();
+                            //cout << "after : " + d_after.str() << endl;
+
                             ego_car.setYaw(j[1]["yaw"]);
                             ego_car.setSpeed(j[1]["speed"]);
 
@@ -336,10 +351,10 @@ int main() {
                             // Sensor Fusion Data, a list of all other cars on the same side of the road.
                             vector<vector<double>> sensor_fusion = j[1]["sensor_fusion"];
 
-                            double target_velocity = 49.5; //mph
+                            double target_velocity = 47; //mph
 
                             /// simulator moves the car to next point 50 times per second.
-                            double move_ego_car_to_next_waypoint_in_seconds = 0.02; //every 20 milliseconds.
+                            double move_ego_car_to_next_waypoint_in_seconds = 0.02;  //every 20 milliseconds.
 
                             // A previous list of points that the car was following and will help us when doing a
                             // transition.
@@ -386,9 +401,10 @@ int main() {
                                     check_car_s += car_in_my_lane.calculateS(prev_traj_path_list_size,
                                                                              move_ego_car_to_next_waypoint_in_seconds);
 
+                                    /// BEHAVIOUR 1 : "Keep safe distance from closest car in front of ego car."
                                     // check s values greater than mine and s gap
-                                    // traffic car ahead of us is within our 30 point trajectory line
-                                    if ((check_car_s > ego_car.getS()) && ((check_car_s - ego_car.getS()) < 30) &&
+                                    // traffic car ahead of us is within our 34 point trajectory line
+                                    if ((check_car_s > ego_car.getS()) && ((check_car_s - ego_car.getS()) < 34) &&
                                         ((check_car_s - ego_car.getS()) < closest_dist_s)) {
 
                                         closest_dist_s = (check_car_s - ego_car.getS());
@@ -413,6 +429,7 @@ int main() {
                                 }
                             }
 
+                            /// BEHAVIOUR 2 : "Overtake slower cars, using left lanes."
                             //try to change lanes if too close to car in front
                             if (change_lanes && ((next_waypoint - lane_change_wp) % map_waypoints_x.size() > 2)) {
                                 bool changed_lanes = false;
@@ -435,9 +452,10 @@ int main() {
 
                                             double dist_s = check_car_s - ego_car.getS();
 
-                                            // Next line made ego car too aggressive : tail-gating before lane change.
-                                            //if (dist_s < 10 && dist_s > -10) {
-                                            if (dist_s < 20 && dist_s > -20) {
+                                            /// BEHAVIOUR 1 VIOLATION : commented line made ego car tail-gate
+                                            /// before lane change.
+                                            //if (dist_s < 10 && dist_s > -10) {  // Unsafe behaviour!
+                                            if (dist_s < 34 && dist_s > -34) {
                                                 lane_safe = false;
                                             }
                                         }
@@ -448,6 +466,7 @@ int main() {
                                         lane_change_wp = next_waypoint;
                                     }
                                 }
+                                /// BEHAVIOUR 3 : "Overtake slower cars, using right lanes."
                                 //next try to change to right lane
                                 if (lane != 2 && !changed_lanes) {
                                     bool lane_safe = true;
@@ -467,9 +486,9 @@ int main() {
 
                                             double dist_s = check_car_s - ego_car.getS();
 
-                                            // Next line made ego car too aggressive : tail-gating before lane change.
+                                            /// BEHAVIOUR 1 VIOLATION : commented line made ego car tail-gate before lane change.
                                             //if (dist_s < 10 && dist_s > -10) {
-                                            if (dist_s < 20 && dist_s > -20) {
+                                            if (dist_s < 34 && dist_s > -34) {
                                                 lane_safe = false;
                                             }
                                         }
@@ -485,14 +504,19 @@ int main() {
                             }
 
 
+                            /// TRAJECTORY
                             vector<double> ptsx;
                             vector<double> ptsy;
 
+                            /*
+                             * Get last 2 trajectory points for both x and y
+                             */
                             if (prev_traj_path_list_size < 2) {
                                 double prev_car_x = ego_car.getX() - cos(ego_car.getYaw());
                                 double prev_car_y = ego_car.getY() - sin(ego_car.getYaw());
 
-                                ptsx.push_back(prev_car_x);
+                                ptsx.push_back(prev_car_x);  // Adds a new element at the end of the vector,
+                                                             // after its current last element.
                                 ptsx.push_back(ego_car.getX());
 
                                 ptsy.push_back(prev_car_y);
@@ -515,10 +539,11 @@ int main() {
                             vector<double> next_wp2 = getXY(ego_car.getS() + 90, (2 + 4 * lane), map_waypoints_s,
                                                             map_waypoints_x, map_waypoints_y);
 
+                            // x values at 30m, 60m, 90m from starting reference
                             ptsx.push_back(next_wp0[0]);
                             ptsx.push_back(next_wp1[0]);
                             ptsx.push_back(next_wp2[0]);
-
+                            // y values at 30m, 60m, 90m from starting reference
                             ptsy.push_back(next_wp0[1]);
                             ptsy.push_back(next_wp1[1]);
                             ptsy.push_back(next_wp2[1]);
@@ -538,7 +563,7 @@ int main() {
 
                             }
 
-                            // Create a spline.
+                            // Create a trajectory spline.
                             tk::spline s;
 
                             // Set (x,y) 'anchor' points (or 'knots') around which the smooth spline is formed.
@@ -556,10 +581,11 @@ int main() {
 
                             // Calculate how to break up spline points so that we travel at our desired
                             // reference velocity and avoid jerk violation.
-                            double target_x = 30.0;  // Our horizon along x-axis. Smaller than 30 values
+                            double target_x = 34.0;  // Our horizon along x-axis. Smaller than 34 values
                             // will cause the car to drive up too close to the car in front before changing lanes.
                             double target_y = s(
                                     target_x);  // ask spline what is the corresponding y-value for the given x-value
+                            target_y += 0.34;  // adjust by 34 cm to right to compensate for map inaccuracy.
                             double target_dist = sqrt(
                                     (target_x) * (target_x) + (target_y) * (target_y));  // Distance from either the car
                             // or the last point in previous path to this target.
@@ -595,7 +621,7 @@ int main() {
                                 double x_point = x_add_on + (target_x) / N;
                                 double y_point = s(
                                         x_point);  // Corresponding y-axis value from x_point -> smooth spline line
-                                // This will ensure car will go at the desired speed e.g. 49.5
+                                // This will ensure car will go at the desired speed e.g. 47 MPH
 
                                 x_add_on = x_point;
 
